@@ -54,6 +54,26 @@ if (-not $?) {
 $fuelinstpath = $PWD
 
 ##################################################################
+# Verify PS 3.0 or greater is installed
+echo "$sep Checking for PowerShell 3.0 at least"
+
+if ($PSVersionTable.psversion.major -lt 3) {
+    echo "$sep Installing PowerShell 3"
+
+    $tempexe = [System.IO.Path]::GetTempFileName() + ".msu"
+    # https://download.microsoft.com/download/E/7/6/E76850B8-DA6E-4FF5-8CCE-A24FC513FD16/Windows6.0-KB2506146-x64.msu
+    (new-object Net.WebClient).DownloadFile(
+        "https://download.microsoft.com/download/E/7/6/E76850B8-DA6E-4FF5-8CCE-A24FC513FD16/Windows6.1-KB2506143-x64.msu",
+        $tempexe)
+    start-sleep 1.5
+    start-process $tempexe -wait
+    remove-item -force $tempexe
+
+    read-host -prompt "$sep PowerShell updated; please re-run PCRFuelDeveloperInstall`nPress enter to finish..."
+    throw "Powershell updated - need to restart"
+}
+
+##################################################################
 # Verify PSBabushka is installed and module is in our working space
 echo "$sep Checking for PSBabushka module"
 $psmodulepath = "$($env:USERPROFILE)\Documents\WindowsPowershell\Modules"
@@ -65,11 +85,11 @@ if (-not $(test-path $psmodulepath\psbabushka)) {
     echo "PSBabushka module already installed"
 }
 
-import-module psbabushka
 
+##################################################################
+# Download PSBabushka Configuration files to a temp directory
 $staging = "$($env:TEMP)\PCRFuelDeveloperInstall"
 mkdir -force $staging
-$env:PATH_BABUSHKA = "$staging/pcrfuelbabushka"
 
 echo "$sep Downloading configuration files at $staging/PCRFuelBabushka"
 
@@ -88,14 +108,21 @@ if (-not $(test-path $staging/pcrfuelbabushka)) {
 
 echo "$sep Checking NCR/PCR Fuel Developer Prerequisites $sep Please assist in tools installation as needed."
 
-invoke-psbabushka ncr-pcr-fuel-dev
+##################################################################
+# Invoke PSBabushka and watch the world burn
+import-module psbabushka
+
+$env:PATH_BABUSHKA = "$staging/pcrfuelbabushka"
+
+try {
+    invoke-psbabushka ncr-pcr-fuel-dev
+} catch {
+    echo "Error invoking PSBabushka to configure 'ncr-pcr-fuel-dev'."
+}
 
 
-echo "$sep Configuration complete; review output for errors."
+echo "$sep PCR Fuel Developer Install is exiting; review output for errors."
 
 read-host -prompt "Press enter to exit..."
-
-
-
 
 
