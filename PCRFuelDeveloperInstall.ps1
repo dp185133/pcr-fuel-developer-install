@@ -2,7 +2,7 @@
 $sep = "`n============"
 
 echo '=================================================================='
-echo "    Welcome to PCR Fuel Developer Install"
+echo "    Welcome to CFR Fuel Developer Install"
 echo '=================================================================='
 echo ''
 start-sleep 1
@@ -65,12 +65,15 @@ if ($PSVersionTable.psversion.major -lt 3) {
 # This is included with the installer because the main download is on
 # amazonaws and gives a permission denied to invoke-webrequest.
 echo "$sep Checking for Git"
-$psmodulepath = "$($env:USERPROFILE)\Documents\WindowsPowershell\Modules"
-if (-not $(is-installed 'git version 2.14')) {
+if (-not $(is-installed 'git version 2.22')) {
     echo "Installing Git"
-    start-process .\Git-2.14.2.2-64-bit.exe -wait
+    $tempexe = [System.IO.Path]::GetTempFileName() + ".exe"
+    invoke-webrequest -outfile $tempexe "http://nexuspro.ncr.com/nexus/service/local/repositories/pcr-fuel-releases/content/devops/git/2.22.0/git-2.22.0-bit.exe"
+    start-sleep 1.5
+    start-process $tempexe -wait
+    remove-item -force $tempexe
 } else {
-    echo "Git 2.14 already installed"
+    echo "Git 2.22 already installed"
 }
 
 $gitcmd = (get-command git).path
@@ -137,7 +140,7 @@ function make-configuration( $name, $description, $configname ) {
 
 
 $selectedConfiguration = `
-  (make-configuration 'Full Fuel Developer' 'All prerequisites for typical PCR Fuel Developer machine.' 'ncr-pcr-fuel-dev'),
+  (make-configuration 'Full Fuel Developer' 'All prerequisites for typical CFR Fuel Developer machine.' 'ncr-pcr-fuel-dev'),
   (make-configuration 'Only WEC7 Development' 'Prerequisites for only WEC7/Panther+x86 compilation environment.' 'ncr-pcr-wec7') |
   out-gridview -title "PCRFuelDeveloperInstall: Select Configuration" -outputmode single
 
@@ -156,7 +159,7 @@ $promptResponse = Show-MessageBox -title "Install $($selectedConfiguration.name)
 if ($promptResponse -eq 'Cancel') { throw "Installation cancelled" }
 
 
-echo "$sep Checking NCR/PCR Fuel Developer Prerequisites $sep Please assist in tools installation as needed."
+echo "$sep Checking NCR/CFR Fuel Developer Prerequisites $sep Please assist in tools installation as needed."
 
 ##################################################################
 # Invoke PSBabushka and watch the world burn
@@ -186,7 +189,7 @@ try {
 }
 
 
-echo "$sep PCR Fuel Developer Install is exiting; review output for errors."
+echo "$sep CFR Fuel Developer Install is exiting; review output for errors."
 
 read-host -prompt "Press enter to exit..."
 
