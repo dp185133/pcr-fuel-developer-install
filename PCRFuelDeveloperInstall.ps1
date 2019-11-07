@@ -33,6 +33,17 @@ function Is-Installed( $program ) {
 echo "$sep Checking for PowerShell 3.0 at least"
 
 if ($PSVersionTable.psversion.major -lt 3) {
+
+    # If you do not have .net 4 installed, you will get the message "update is not applicable to this PC" from powershell installer.
+    # in this case install dotnet 4.7 via
+    if (-not (test-path "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\")) {
+        echo "DotNet 4 framework not found; Please install .NET 4.7..."
+        start-process "https://download.microsoft.com/download/D/D/3/DD35CC25-6E9C-484B-A746-C5BE0C923290/NDP47-KB3186497-x86-x64-AllOS-ENU.exe"
+        start-sleep 10
+        throw "need to install .NET 4 framework; please re-run after installer completes".
+    }
+    
+    
     echo "$sep Installing PowerShell 3"
 
     $tempexe = [System.IO.Path]::GetTempFileName() + ".msu"
@@ -83,7 +94,7 @@ $fuelinstpath = $PWD
 ##################################################################
 # Verify PSBabushka is installed and module is in our working space
 echo "$sep Checking for PSBabushka module"
-$psmodulepath = "$($env:USERPROFILE)\Documents\WindowsPowershell\Modules"
+$psmodulepath = $env:psmodulepath | Split-String ';' | select -first 1
 if (-not $(test-path $psmodulepath\psbabushka)) {
     mkdir -force $psmodulepath
     cd $psmodulepath
@@ -109,6 +120,11 @@ if (-not $(test-path $staging/pcrfuelbabushka)) {
     echo "$sep Checking for new prerequisite definitions"
     pushd $staging\pcrfuelbabushka
     git pull http://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
+    if ($?) {
+        echo "$sep Prerequisite rules updated successfully"
+    } else {
+        echo "$sep Could not update prerequisite rules"
+    }
     popd
 }
 
