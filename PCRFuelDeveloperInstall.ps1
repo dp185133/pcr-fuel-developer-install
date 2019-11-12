@@ -40,7 +40,7 @@ if ($PSVersionTable.psversion.major -lt 3) {
         echo "DotNet 4 framework not found; Please install .NET 4.7..."
         start-process "https://download.microsoft.com/download/D/D/3/DD35CC25-6E9C-484B-A746-C5BE0C923290/NDP47-KB3186497-x86-x64-AllOS-ENU.exe"
         start-sleep 10
-        throw "need to install .NET 4 framework; please re-run after installer completes".
+        throw "need to install .NET 4 framework; please re-run after installer completes"
     }
     
     
@@ -97,7 +97,7 @@ $fuelinstpath = $PWD
 ##################################################################
 # Verify PSBabushka is installed and module is in our working space
 echo "$sep Checking for PSBabushka module"
-$psmodulepath = $env:psmodulepath | Split-String ';' | select -first 1
+$psmodulepath = $env:psmodulepath -split ';' | select -first 1
 if (-not $(test-path $psmodulepath\psbabushka)) {
     mkdir -force $psmodulepath
     cd $psmodulepath
