@@ -101,7 +101,7 @@ $psmodulepath = $env:psmodulepath -split ';' | select -first 1
 if (-not $(test-path $psmodulepath\psbabushka)) {
     mkdir -force $psmodulepath
     cd $psmodulepath
-    git clone http://almgit.ncr.com/scm/~dp185133/psbabushka.git
+    git clone https://almgit.ncr.com/scm/~dp185133/psbabushka.git
 } else {
     echo "PSBabushka module already installed"
 }
