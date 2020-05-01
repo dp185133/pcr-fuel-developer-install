@@ -117,12 +117,12 @@ echo "$sep Downloading configuration files at $staging/PCRFuelBabushka"
 if (-not $(test-path $staging/pcrfuelbabushka)) {
     echo "$sep Retrieving prerequisite definitions"
     pushd $staging
-    git clone http://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
+    git clone https://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
     popd
 } else {
     echo "$sep Checking for new prerequisite definitions"
     pushd $staging\pcrfuelbabushka
-    git pull http://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
+    git pull https://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
     if ($?) {
         echo "$sep Prerequisite rules updated successfully"
     } else {
