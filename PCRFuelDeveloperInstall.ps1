@@ -65,15 +65,16 @@ if ($PSVersionTable.psversion.major -lt 3) {
 # This is included with the installer because the main download is on
 # amazonaws and gives a permission denied to invoke-webrequest.
 echo "$sep Checking for Git"
-if (-not $(is-installed 'git version 2.22')) {
+if (-not $(is-installed 'git version 2.30')) {
     echo "Installing Git"
     $tempexe = [System.IO.Path]::GetTempFileName() + ".exe"
-    invoke-webrequest -outfile $tempexe "http://nexuspro.ncr.com/nexus/service/local/repositories/pcr-fuel-releases/content/devops/git/2.22.0/git-2.22.0-bit.exe"
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12    
+    invoke-webrequest -outfile $tempexe "https://github.com/git-for-windows/git/releases/download/v2.30.0.windows.2/Git-2.30.0.2-64-bit.exe"
     start-sleep 1.5
     start-process $tempexe -wait
     remove-item -force $tempexe
 } else {
-    echo "Git 2.22 already installed"
+    echo "Git 2.30 already installed"
 }
 
 $gitcmd = (get-command git).path
@@ -117,12 +118,12 @@ echo "$sep Downloading configuration files at $staging/PCRFuelBabushka"
 if (-not $(test-path $staging/pcrfuelbabushka)) {
     echo "$sep Retrieving prerequisite definitions"
     pushd $staging
-    git clone https://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
+    git clone https://github.com/ncr-swt-cfr/pcrfuelbabushka.git
     popd
 } else {
     echo "$sep Checking for new prerequisite definitions"
     pushd $staging\pcrfuelbabushka
-    git pull https://almgit.ncr.com/scm/~dp185133/pcrfuelbabushka.git
+    git pull https://github.com/ncr-swt-cfr/pcrfuelbabushka.git
     if ($?) {
         echo "$sep Prerequisite rules updated successfully"
     } else {
