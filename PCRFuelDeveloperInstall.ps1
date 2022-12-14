@@ -60,6 +60,8 @@ if ($PSVersionTable.psversion.major -lt 3) {
 }
 
 
+. "$PSScriptRoot/Show-MessageBox.ps1"
+
 ##################################################################
 # Verify Git Is Installed and create shortcut function for this script.
 # This is included with the installer because the main download is on
@@ -67,6 +69,7 @@ if ($PSVersionTable.psversion.major -lt 3) {
 echo "$sep Checking for Git"
 if (-not $(is-installed 'Git')) {
     echo "Installing Git"
+    Show-MessageBox  -title "Installing Git" -msg "Older versions of Git may not be recognized as already installed.  If you have an older version of git installed (older than 2.39), you should cancel and uninstall it before continuing"
     $tempexe = [System.IO.Path]::GetTempFileName() + ".exe"
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12    
     invoke-webrequest -outfile $tempexe "https://github.com/git-for-windows/git/releases/download/v2.39.0.windows.1/Git-2.39.0-64-bit.exe"
@@ -74,7 +77,7 @@ if (-not $(is-installed 'Git')) {
     start-process $tempexe -wait
     remove-item -force $tempexe
 } else {
-    echo "Git 2.30 already installed"
+    echo "Git 2.3x+ already installed"
 }
 
 $gitcmd = (get-command git).path
@@ -141,8 +144,8 @@ function make-configuration( $name, $description, $configname ) {
 
 
 $selectedConfiguration = `
-  (make-configuration 'Post-2023 Only' 'Prerequisites for only NT/Panther2+x86 compilation environment.' 'ncr-pcr-nt') |
-  (make-configuration 'Full Fuel Developer' 'All prerequisites for typical CFR Fuel Developer machine.' 'ncr-pcr-fuel-dev'),
+  (make-configuration 'Post-2023 Only' 'Prerequisites for only NT/Panther2+x86 compilation environment.' 'ncr-pcr-nt'),
+  (make-configuration 'Legacy Fuel Developer' 'All prerequisites for CFR Fuel Developer machine with legacy tools.' 'ncr-pcr-fuel-dev'),
   (make-configuration 'Only WEC7 Development' 'Prerequisites for only WEC7/Panther+x86 compilation environment.' 'ncr-pcr-wec7') |
   out-gridview -title "PCRFuelDeveloperInstall: Select Configuration" -outputmode single
 
@@ -154,7 +157,6 @@ if (-not $selectedConfiguration) {
 }
 
 
-. "$PSScriptRoot/Show-MessageBox.ps1"
 $promptResponse = Show-MessageBox -title "Install $($selectedConfiguration.name) Tools?" -Msg `
   "Press 'Yes' to install all prerequisites automatically;`nPress 'No' to prompt before making changes for each prerequisite.`nPress 'Cancel' to abort." -YesNoCancel
 
