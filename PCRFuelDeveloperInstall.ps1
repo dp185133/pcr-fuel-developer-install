@@ -18,10 +18,10 @@ start-sleep 1
 
 function Is-Installed( $program ) {
     $x86 = ((Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall") |
-      Where-Object { $_.GetValue( "DisplayName" ) -like "*$program*" } ).Length -gt 0;
+      Where-Object { $_.GetValue( "DisplayName" ) -eq $program } ).Length -gt 0;
     
     $x64 = ((Get-ChildItem "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall") |
-        Where-Object { $_.GetValue( "DisplayName" ) -like "*$program*" } ).Length -gt 0;
+        Where-Object { $_.GetValue( "DisplayName" ) -eq $program } ).Length -gt 0;
 
     return $x86 -or $x64;
 }
@@ -65,11 +65,11 @@ if ($PSVersionTable.psversion.major -lt 3) {
 # This is included with the installer because the main download is on
 # amazonaws and gives a permission denied to invoke-webrequest.
 echo "$sep Checking for Git"
-if (-not $(is-installed 'git version 2.30')) {
+if (-not $(is-installed 'Git')) {
     echo "Installing Git"
     $tempexe = [System.IO.Path]::GetTempFileName() + ".exe"
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12    
-    invoke-webrequest -outfile $tempexe "https://github.com/git-for-windows/git/releases/download/v2.30.0.windows.2/Git-2.30.0.2-64-bit.exe"
+    invoke-webrequest -outfile $tempexe "https://github.com/git-for-windows/git/releases/download/v2.39.0.windows.1/Git-2.39.0-64-bit.exe"
     start-sleep 1.5
     start-process $tempexe -wait
     remove-item -force $tempexe
@@ -141,6 +141,7 @@ function make-configuration( $name, $description, $configname ) {
 
 
 $selectedConfiguration = `
+  (make-configuration 'Post-2023 Only' 'Prerequisites for only NT/Panther2+x86 compilation environment.' 'ncr-pcr-nt') |
   (make-configuration 'Full Fuel Developer' 'All prerequisites for typical CFR Fuel Developer machine.' 'ncr-pcr-fuel-dev'),
   (make-configuration 'Only WEC7 Development' 'Prerequisites for only WEC7/Panther+x86 compilation environment.' 'ncr-pcr-wec7') |
   out-gridview -title "PCRFuelDeveloperInstall: Select Configuration" -outputmode single
